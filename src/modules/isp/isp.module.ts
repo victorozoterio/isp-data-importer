@@ -17,5 +17,6 @@ import { ConfigService } from '@nestjs/config';
   ],
   controllers: [IspController],
   providers: [IspService],
+  exports: [IspService],
 })
 export class IspModule {}
