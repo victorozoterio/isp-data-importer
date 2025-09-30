@@ -3,6 +3,7 @@ import { CreateBoxDto } from './dto/create-box.dto';
 import { CreateCableDto } from './dto/create-cable.dto';
 import { IspService } from '../isp/isp.service';
 import { OzmapRepository } from './ozmap.repository';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 export interface OzmapSdk {
   box: { create(dto: CreateBoxDto) };
@@ -21,6 +22,7 @@ export class OzmapService {
     private readonly ozmapRepository: OzmapRepository,
   ) {}
 
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async synchronize() {
     this.logger.log('Starting OZmap synchronization');
     const startTime = Date.now();
