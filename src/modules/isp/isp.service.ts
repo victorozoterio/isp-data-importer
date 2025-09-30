@@ -18,18 +18,21 @@ export class IspService {
     const startTime = Date.now();
 
     try {
-      const [cables, dropCables, boxes, customers] = await Promise.all([
+      const [cables, dropCables, boxes, customers] = await Promise.allSettled([
         this.getCables(),
         this.getDropCables(),
         this.getBoxes(),
         this.getCustomers(),
       ]);
 
-      this.logger.log(
-        `ISP data retrieval completed in ${Date.now() - startTime}ms. Summary: ${cables.length} cables, ${dropCables.length} drop cables, ${boxes.length} boxes, ${customers.length} customers`,
-      );
+      this.logger.log(`ISP retrieval finished in ${Date.now() - startTime}ms`);
 
-      return { cables, drop_cables: dropCables, boxes, customers };
+      return {
+        cables: cables.status === 'fulfilled' ? cables.value : [],
+        drop_cables: dropCables.status === 'fulfilled' ? dropCables.value : [],
+        boxes: boxes.status === 'fulfilled' ? boxes.value : [],
+        customers: customers.status === 'fulfilled' ? customers.value : [],
+      };
     } catch (error) {
       this.logger.error(
         `ISP data retrieval failed after ${Date.now() - startTime}ms. Error: ${error.message}`,
