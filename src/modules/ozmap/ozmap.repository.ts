@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Box, BoxDocument } from './schemas/box.schema';
@@ -7,6 +7,8 @@ import { Box as BoxType, Cable as CableType } from './types';
 
 @Injectable()
 export class OzmapRepository {
+  private readonly logger = new Logger(OzmapRepository.name);
+
   constructor(
     @InjectModel(Box.name) private boxModel: Model<BoxDocument>,
     @InjectModel(Cable.name) private cableModel: Model<CableDocument>,
@@ -23,8 +25,11 @@ export class OzmapRepository {
         updatedAt: box.updatedAt,
       });
 
-      return await boxResponse.save();
+      const saved = await boxResponse.save();
+      this.logger.log(`Box persisted to database. ISP ID: ${box.id}, OZmap ID: ${saved._id}`);
+      return saved;
     } catch (error) {
+      this.logger.error(`Failed to persist box. ISP ID: ${box.id}. Error: ${error.message}`);
       throw error;
     }
   }
@@ -42,8 +47,11 @@ export class OzmapRepository {
         updatedAt: cable.updatedAt,
       });
 
-      return await cableResponse.save();
+      const saved = await cableResponse.save();
+      this.logger.log(`Cable persisted to database. ISP ID: ${cable.id}, OZmap ID: ${saved._id}`);
+      return saved;
     } catch (error) {
+      this.logger.error(`Failed to persist cable. ISP ID: ${cable.id}. Error: ${error.message}`);
       throw error;
     }
   }
